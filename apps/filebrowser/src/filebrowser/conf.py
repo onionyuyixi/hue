@@ -65,3 +65,9 @@ REDIRECT_DOWNLOAD = Config(
     'Redirect client to WebHdfs or S3 for file download. Note: Turning this on will override notebook/redirect_whitelist for user selected file downloads on WebHdfs & S3.'),
   type=coerce_bool,
   default=False)
+
+REMOTE_STORAGE_HOME=Config(
+  key="remote_storage_home",
+  type=str,
+  default=None,
+  help="Optionally set this if you want a different home directory path. e.g. s3a://gethue.")

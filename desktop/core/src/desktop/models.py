@@ -60,6 +60,8 @@ from desktop.lib.paths import get_run_root, SAFE_CHARACTERS_URI_COMPONENTS
 from desktop.redaction import global_redaction_engine
 from desktop.settings import DOCUMENT2_SEARCH_MAX_LENGTH, HUE_DESKTOP_VERSION
 
+from filebrowser.conf import REMOTE_STORAGE_HOME
+
 if sys.version_info[0] > 2:
   from urllib.parse import quote as urllib_quote
 else:
@@ -1909,6 +1911,7 @@ class ClusterConfig(object):
       hdfs_connectors.append(_('Files'))
 
     for hdfs_connector in hdfs_connectors:
+      home_path = REMOTE_STORAGE_HOME.get() if REMOTE_STORAGE_HOME.get() else self.user.get_home_directory().encode('utf-8')
       interpreters.append({
         'type': 'hdfs',
         'displayName': hdfs_connector,
@@ -1916,37 +1919,39 @@ class ClusterConfig(object):
         'tooltip': hdfs_connector,
         'page': '/filebrowser/' + (
           not self.user.is_anonymous() and
-          'view=' + urllib_quote(self.user.get_home_directory().encode('utf-8'), safe=SAFE_CHARACTERS_URI_COMPONENTS) or ''
+          'view=' + urllib_quote(home_path, safe=SAFE_CHARACTERS_URI_COMPONENTS) or ''
         )
       })
 
     if 'filebrowser' in self.apps and fsmanager.is_enabled_and_has_access('s3a', self.user):
+      home_path = REMOTE_STORAGE_HOME.get() if REMOTE_STORAGE_HOME.get() else 'S3A://'.encode('utf-8')
       interpreters.append({
         'type': 's3',
         'displayName': _('S3'),
         'buttonName': _('Browse'),
         'tooltip': _('S3'),
-        'page': '/filebrowser/view=' + urllib_quote('S3A://'.encode('utf-8'), safe=SAFE_CHARACTERS_URI_COMPONENTS)
+        'page': '/filebrowser/view=' + urllib_quote(home_path, safe=SAFE_CHARACTERS_URI_COMPONENTS)
       })
 
     if 'filebrowser' in self.apps and fsmanager.is_enabled_and_has_access('adl', self.user):
+      home_path = REMOTE_STORAGE_HOME.get() if REMOTE_STORAGE_HOME.get() else 'adl:/'.encode('utf-8')
       interpreters.append({
         'type': 'adls',
         'displayName': _('ADLS'),
         'buttonName': _('Browse'),
         'tooltip': _('ADLS'),
-        'page': '/filebrowser/view=' + urllib_quote('adl:/'.encode('utf-8'), safe=SAFE_CHARACTERS_URI_COMPONENTS)
+        'page': '/filebrowser/view=' + urllib_quote(home_path, safe=SAFE_CHARACTERS_URI_COMPONENTS)
       })
 
     if 'filebrowser' in self.apps and fsmanager.is_enabled_and_has_access('abfs', self.user):
       from azure.abfs.__init__ import get_home_dir_for_ABFS
-
+      home_path = REMOTE_STORAGE_HOME.get() if REMOTE_STORAGE_HOME.get() else get_home_dir_for_ABFS().encode('utf-8')
       interpreters.append({
         'type': 'abfs',
         'displayName': _('ABFS'),
         'buttonName': _('Browse'),
         'tooltip': _('ABFS'),
-        'page': '/filebrowser/view=' + urllib_quote(get_home_dir_for_ABFS().encode('utf-8'), safe=SAFE_CHARACTERS_URI_COMPONENTS)
+        'page': '/filebrowser/view=' + urllib_quote(home_path, safe=SAFE_CHARACTERS_URI_COMPONENTS)
       })
 
     if 'metastore' in self.apps:
